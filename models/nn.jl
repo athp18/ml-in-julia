@@ -1,26 +1,27 @@
+#To do: make more complex
+
 using Random
 
-# Define the structure for a Dense Layer
 struct DenseLayer
     weights::Matrix{Float64}
     biases::Vector{Float64}
 end
 
-# Initialize a Dense Layer
+#dense layer
 function DenseLayer(input_size::Int, output_size::Int)
     weights = randn(output_size, input_size) * 0.01
     biases = randn(output_size) * 0.01
     DenseLayer(weights, biases)
 end
 
-# Define the Neural Network structure
+#nn structure
 struct FeedforwardNN
     layers::Vector{DenseLayer}
     activation::Function
     output_activation::Function
 end
 
-# Initialize the Neural Network
+#initialize nn
 function FeedforwardNN(input_size::Int, hidden_sizes::Vector{Int}, output_size::Int; activation=relu, output_activation=softmax)
     layers = DenseLayer(input_size, hidden_sizes[1])
     for i in 1:length(hidden_sizes)-1
@@ -30,10 +31,10 @@ function FeedforwardNN(input_size::Int, hidden_sizes::Vector{Int}, output_size::
     FeedforwardNN(layers, activation, output_activation)
 end
 
-# Define the ReLU activation function
+#relu
 relu(x) = max.(0, x)
 
-# Define the softmax activation function
+#softmax
 function softmax(x)
     exp_x = exp.(x .- maximum(x))
     return exp_x ./ sum(exp_x)
