@@ -53,7 +53,7 @@ function cross_entropy_loss(y_pred, y_true)
     return -sum(y_true .* log.(y_pred))
 end
 
-# Gradient computation using finite differences (for simplicity)
+# compute gradients using finite differences (for simplicity)
 function compute_gradients(nn::FeedforwardNN, x, y_true)
     ε = 1e-5
     gradients = []
