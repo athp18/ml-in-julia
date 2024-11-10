@@ -36,7 +36,7 @@ function DenseLayer(input_size::Int, output_size::Int)
 end
 
 # Feedforward Neural Network Structure
-struct FeedforwardNN
+struct NeuralNetwork
     layers::Vector{DenseLayer}
     activation::Function
     activation_derivative::Function
@@ -45,7 +45,7 @@ struct FeedforwardNN
 end
 
 # Initialize Neural Network
-function FeedforwardNN(input_size::Int, hidden_sizes::Vector{Int}, output_size::Int;
+function NeuralNetwork(input_size::Int, hidden_sizes::Vector{Int}, output_size::Int;
                        activation=relu, activation_derivative=drelu,
                        output_activation=softmax, output_activation_derivative=dsoftmax)
     layers = Vector{DenseLayer}()
@@ -55,11 +55,11 @@ function FeedforwardNN(input_size::Int, hidden_sizes::Vector{Int}, output_size::
         prev_size = size
     end
     push!(layers, DenseLayer(prev_size, output_size))
-    FeedforwardNN(layers, activation, activation_derivative, output_activation, output_activation_derivative)
+    NeuralNetwork(layers, activation, activation_derivative, output_activation, output_activation_derivative)
 end
 
 # Forward Pass
-function forward(nn::FeedforwardNN, x::Vector{Float64})
+function forward(nn::NeuralNetwork, x::Vector{Float64})
     for (i, layer) in enumerate(nn.layers)
         layer.input = x
         z = layer.weights * x .+ layer.biases
@@ -75,7 +75,7 @@ function forward(nn::FeedforwardNN, x::Vector{Float64})
 end
 
 # Backward Pass
-function backward!(nn::FeedforwardNN, y_pred, y_true)
+function backward!(nn::NeuralNetwork, y_pred, y_true)
     # Initialize delta for output layer
     delta = y_pred .- y_true  # Assuming cross-entropy loss with softmax
     for i in reverse(1:length(nn.layers))
@@ -93,7 +93,7 @@ function backward!(nn::FeedforwardNN, y_pred, y_true)
 end
 
 # Update Parameters
-function update_parameters!(nn::FeedforwardNN, learning_rate::Float64, momentum::Float64,
+function update_parameters!(nn::NeuralNetwork, learning_rate::Float64, momentum::Float64,
                            velocity_w::Vector{Matrix{Float64}}, velocity_b::Vector{Vector{Float64}})
     for (i, layer) in enumerate(nn.layers)
         # Update velocities
@@ -109,7 +109,7 @@ function update_parameters!(nn::FeedforwardNN, learning_rate::Float64, momentum:
 end
 
 # Training Function with Backpropagation and Mini-Batch
-function train!(nn::FeedforwardNN, X::Matrix{Float64}, Y::Matrix{Float64};
+function train!(nn::NeuralNetwork, X::Matrix{Float64}, Y::Matrix{Float64};
                 epochs::Int, learning_rate::Float64, batch_size::Int, momentum::Float64=0.9)
     n_samples = size(X, 2)
     velocity_w = [zeros(layer.weights) for layer in nn.layers]
@@ -145,7 +145,7 @@ function train!(nn::FeedforwardNN, X::Matrix{Float64}, Y::Matrix{Float64};
 end
 
 # Prediction Function
-function predict(nn::FeedforwardNN, X::Matrix{Float64})
+function predict(nn::NeuralNetwork, X::Matrix{Float64})
     y_preds = Matrix{Float64}(undef, size(X, 2), size(nn.layers[end].weights, 1))
     for i in 1:size(X, 2)
         y_pred = forward(nn, X[:, i])
@@ -191,7 +191,7 @@ function main()
     input_size = 28^2
     hidden_sizes = [128, 64]
     output_size = 10
-    nn = FeedforwardNN(input_size, hidden_sizes, output_size)
+    nn = NeuralNetwork(input_size, hidden_sizes, output_size)
     
     # Training Parameters
     epochs = 20
